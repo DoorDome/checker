@@ -29,6 +29,7 @@ class ManytaskPlugin(PluginABC):
         username: str
         task_name: str
         score: float | None  # TODO: validate score is in [0, 1] (bonus score is higher than 1)
+        review: bool
         report_url: AnyUrl
         report_token: str
         check_deadline: bool
@@ -47,6 +48,7 @@ class ManytaskPlugin(PluginABC):
             "task": args.task_name,
             "username": args.username,
             "score": args.score,
+            "review": args.review,
             "check_deadline": args.check_deadline,
             "submit_time": send_time_formatted,
         }

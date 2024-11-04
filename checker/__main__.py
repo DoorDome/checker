@@ -356,6 +356,65 @@ def grade(
 
 
 @cli.command()
+@click.argument("root", type=ClickReadableDirectory, default=".")
+@click.argument("reference_root", type=ClickReadableDirectory, default=".")
+@click.option("--branch", type=str, default=None, help="Rewrite branch name for the submission")
+@click.option("--no-clean", is_flag=True, help="Clean or not check tmp folders")
+@click.option(
+    "-v/-s",
+    "--verbose/--silent",
+    is_flag=True,
+    default=False,
+    help="Verbose tests output",
+)
+@click.option("--dry-run", is_flag=True, help="Do not execute anything, only log actions")
+@click.pass_context
+def review(
+    ctx: click.Context,
+    root: Path,
+    reference_root: Path,
+    branch: str | None,
+    no_clean: bool,
+    verbose: bool,
+    dry_run: bool,
+) -> None:    
+    # get configs paths
+    course_config_path = reference_root / CHECKER_CONFIG
+    manytask_config_path = reference_root / MANYTASK_CONFIG
+
+    # load configs
+    checker_config = CheckerConfig.from_yaml(course_config_path)
+    manytask_config = ManytaskConfig.from_yaml(manytask_config_path)
+
+    if checker_config.structure.private_resources_dir:
+        checker_config.structure.private_patterns = [
+            checker_config.structure.private_resources_dir
+        ] + (
+            checker_config.structure.private_patterns
+            if checker_config.structure.private_patterns
+            else []
+        )
+
+    # read filesystem, check existing tasks
+    course = Course(manytask_config, root, reference_root, branch_name=branch)
+
+    # create exporter and export files for testing
+    exporter = Exporter(
+        course,
+        checker_config.structure,
+        checker_config.export,
+        verbose=False,
+        cleanup=not no_clean,
+        dry_run=dry_run,
+    )
+    exporter.export_for_testing(exporter.temporary_dir)
+
+    tester = Tester(course, checker_config, tmp_dir=exporter.temporary_dir, verbose=verbose, dry_run=dry_run)
+    for task in course.detect_changes(checker_config.testing.changes_detection):
+        tester.report(task)
+
+
+@cli.command()
 @click.argument("reference_root", type=ClickReadableDirectory, default=".")
 @click.argument("export_root", type=ClickWritableDirectory, default="./export")
 @click.option("--commit", is_flag=True, help="Commit and push changes to the repository")
