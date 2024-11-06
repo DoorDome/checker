@@ -15,9 +15,12 @@ from .tester import Tester
 from .utils import print_ascii_tag, print_info
 
 
-ClickReadableFile = click.Path(exists=True, file_okay=True, readable=True, path_type=Path)
-ClickReadableDirectory = click.Path(exists=True, file_okay=False, readable=True, path_type=Path)
-ClickWritableDirectory = click.Path(file_okay=False, writable=True, path_type=Path)
+ClickReadableFile = click.Path(
+    exists=True, file_okay=True, readable=True, path_type=Path)
+ClickReadableDirectory = click.Path(
+    exists=True, file_okay=False, readable=True, path_type=Path)
+ClickWritableDirectory = click.Path(
+    file_okay=False, writable=True, path_type=Path)
 
 CHECKER_CONFIG = ".checker.yml"
 MANYTASK_CONFIG = ".manytask.yml"
@@ -63,7 +66,7 @@ def validate(
         print_info(e)
         exit(1)
     print_info("Ok", color="green")
-    
+
     if checker_config.structure.private_resources_dir:
         checker_config.structure.private_patterns = [
             checker_config.structure.private_resources_dir
@@ -102,7 +105,8 @@ def validate(
 
     print_info("Validating tester...")
     try:
-        tester = Tester(course, checker_config, tmp_dir=exporter.temporary_dir, verbose=verbose)
+        tester = Tester(course, checker_config,
+                        tmp_dir=exporter.temporary_dir, verbose=verbose)
         tester.validate()
     except CheckerValidationError as e:
         print_info("Tester Validation Failed", color="red")
@@ -174,7 +178,8 @@ def check(
     4. Cleanup temporary directory.
     """
     # validate first
-    ctx.invoke(validate, root=root, verbose=verbose)  # TODO: check verbose level
+    # TODO: check verbose level
+    ctx.invoke(validate, root=root, verbose=verbose)
 
     # get configs paths
     course_config_path = root / CHECKER_CONFIG
@@ -192,7 +197,7 @@ def check(
             if checker_config.structure.private_patterns
             else []
         )
-    
+
     # read filesystem, check existing tasks
     course = Course(manytask_config, root, reference_root)
 
@@ -232,14 +237,16 @@ def check(
         print_info(f"Checking tasks: {', '.join(filesystem_tasks.keys())}")
 
     # create tester to... to test =)
-    tester = Tester(course, checker_config, tmp_dir=exporter.temporary_dir, verbose=verbose, dry_run=dry_run)
+    tester = Tester(course, checker_config,
+                    tmp_dir=exporter.temporary_dir, verbose=verbose, dry_run=dry_run)
 
     # run tests
     # TODO: progressbar on parallelize
     try:
         tester.run(
             exporter.temporary_dir,
-            tasks=list(filesystem_tasks.values()) if filesystem_tasks else None,
+            tasks=list(filesystem_tasks.values()
+                       ) if filesystem_tasks else None,
             report=False,
         )
     except TestingError as e:
@@ -323,7 +330,8 @@ def grade(
 
     # detect changes to test
     try:
-        changed_tasks = course.detect_changes(checker_config.testing.changes_detection)
+        changed_tasks = course.detect_changes(
+            checker_config.testing.changes_detection)
     except Exception as e:
         print_info("DETECT CHANGES FAILED", color="red")
         print_info(e)
@@ -334,7 +342,8 @@ def grade(
         return
 
     # create tester to... to test =)
-    tester = Tester(course, checker_config, tmp_dir=exporter.temporary_dir, verbose=verbose, dry_run=dry_run)
+    tester = Tester(course, checker_config,
+                    tmp_dir=exporter.temporary_dir, verbose=verbose, dry_run=dry_run)
 
     # run tests
     # TODO: progressbar on parallelize
@@ -377,7 +386,7 @@ def review(
     no_clean: bool,
     verbose: bool,
     dry_run: bool,
-) -> None:    
+) -> None:
     # get configs paths
     course_config_path = reference_root / CHECKER_CONFIG
     manytask_config_path = reference_root / MANYTASK_CONFIG
@@ -409,7 +418,8 @@ def review(
     )
     exporter.export_for_testing(exporter.temporary_dir)
 
-    tester = Tester(course, checker_config, tmp_dir=exporter.temporary_dir, verbose=verbose, dry_run=dry_run)
+    tester = Tester(course, checker_config,
+                    tmp_dir=exporter.temporary_dir, verbose=verbose, dry_run=dry_run)
     for task in course.detect_changes(checker_config.testing.changes_detection):
         tester.report(task)
 
@@ -467,7 +477,8 @@ def export(
         dry_run=dry_run,
     )
     export_root.mkdir(exist_ok=True, parents=True)
-    exporter.export_public(export_root, push=commit, commit_message=checker_config.export.commit_message)
+    exporter.export_public(export_root, push=commit,
+                           commit_message=checker_config.export.commit_message)
 
 
 @cli.command()
