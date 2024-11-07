@@ -260,6 +260,14 @@ def check(
         exit(1)
     print_info("TESTING PASSED", color="green")
 
+def _get_task_name(branch: str | None) -> str:
+    BRANCH_PREFIX = "submit/"
+    print_info(f"Current branch: {branch}")
+    if not branch or not branch.startswith(BRANCH_PREFIX):
+        print_info("UNEXPECTED BRANCH", color="red")
+        print_info(f"Branch should start with '{BRANCH_PREFIX}'")
+        exit(1)
+    return branch[len(BRANCH_PREFIX):]
 
 @cli.command()
 @click.argument("root", type=ClickReadableDirectory, default=".")
@@ -297,6 +305,8 @@ def grade(
     3. Run pipelines: global, tasks and report.
     4. Cleanup temporary directory.
     """
+    branch = _get_task_name(branch)
+
     # get configs paths
     course_config_path = reference_root / CHECKER_CONFIG
     manytask_config_path = reference_root / MANYTASK_CONFIG
@@ -387,6 +397,8 @@ def review(
     verbose: bool,
     dry_run: bool,
 ) -> None:
+    branch = _get_task_name(branch)
+    
     # get configs paths
     course_config_path = reference_root / CHECKER_CONFIG
     manytask_config_path = reference_root / MANYTASK_CONFIG
