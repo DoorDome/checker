@@ -32,6 +32,7 @@ class ManytaskPlugin(PluginABC):
         score: float | None  # TODO: validate score is in [0, 1] (bonus score is higher than 1)
         report_url: AnyUrl
         report_token: str
+        reported_by: str
         check_deadline: bool
         send_time: datetime = datetime.now().astimezone()
 
@@ -49,6 +50,7 @@ class ManytaskPlugin(PluginABC):
             "username": args.username,
             "score": args.score,
             "review": {"approve": True, "reject": False}.get(args.job_name, None),
+            "reported_by": args.reported_by,
             "check_deadline": args.check_deadline,
             "submit_time": send_time_formatted,
         }
