@@ -26,6 +26,7 @@ class ManytaskPlugin(PluginABC):
     class Args(PluginABC.Args):
         origin: Optional[str] = None  # as pydantic does not support | in older python versions
         job_name: str
+        merge_request_iid: int | None
         patterns: list[str] = ["*"]
         username: str
         task_name: str
@@ -49,7 +50,8 @@ class ManytaskPlugin(PluginABC):
             "task": args.task_name,
             "username": args.username,
             "score": args.score,
-            "review": {"approve": True, "reject": False}.get(args.job_name, None),
+            "request_type": args.job_name,
+            "merge_request_iid": args.merge_request_iid,
             "reported_by": args.reported_by,
             "check_deadline": args.check_deadline,
             "submit_time": send_time_formatted,
