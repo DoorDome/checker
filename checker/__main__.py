@@ -432,8 +432,11 @@ def review(
 
     tester = Tester(course, checker_config,
                     tmp_dir=exporter.temporary_dir, verbose=verbose, dry_run=dry_run)
+    all_succeeded = True
     for task in course.detect_changes(checker_config.testing.changes_detection):
-        tester.report(task)
+        all_succeeded &= tester.report(task)
+    if not all_succeeded:
+        exit(1)
 
 
 @cli.command()

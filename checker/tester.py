@@ -229,7 +229,7 @@ class Tester:
         if failed_tasks:
             raise TestingError(f"Task pipelines failed: {failed_tasks}")
         
-    def report(self, task: FileSystemTask):
+    def report(self, task: FileSystemTask) -> bool:
         global_variables = GlobalPipelineVariables(
             ref_dir=".",
             repo_dir=".",
@@ -249,5 +249,7 @@ class Tester:
         task_report_result: PipelineResult = self.report_pipeline.run(context, dry_run=self.dry_run)
         if task_report_result:
             print_info("->Reporting succeeded")
+            return True
         else:
             print_info("->Reporting failed")
+            return False
