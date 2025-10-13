@@ -34,6 +34,19 @@ class CppBuildPlugin(PluginABC):
 
         for target, build_type in zip(targets, build_types):
             build_dir = args.root / f"build-{build_type.lower()}"
+
+            print_info(f"Configuring {target} ({build_type})...", color="orange")
+            run_args = SafeRunScriptPlugin.Args(
+                origin=str(build_dir),
+                script=["cmake", ".."],
+                env_whitelist=["PATH"],
+                env_additional={"CLICOLOR_FORCE": "1"},
+                paths_whitelist=[str(args.root)],
+                paths_blacklist=get_cpp_blacklist(args.root),
+            )
+            output = SafeRunScriptPlugin()._run(run_args, verbose=verbose).output
+            print_info(output)
+
             print_info(f"Building {target} ({build_type})...", color="orange")
             run_args = SafeRunScriptPlugin.Args(
                 origin=str(build_dir),
