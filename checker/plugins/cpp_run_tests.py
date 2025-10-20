@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 
 from checker.exceptions import PluginExecutionFailed
+from checker.plugins.cpp.blacklist import get_cpp_blacklist
 from checker.plugins.firejail import SafeRunScriptPlugin
 from checker.utils import print_info
 
@@ -62,7 +63,7 @@ class CppRunTestsPlugin(PluginABC):
             env_additional=env,
             timeout=args.timeout,
             paths_whitelist=paths_whitelist,
-            paths_blacklist=paths_blacklist,
+            paths_blacklist=paths_blacklist + get_cpp_blacklist(args.root, testing=True),
             lock_network=args.lock_network,
         )
         try:
