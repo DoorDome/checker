@@ -25,6 +25,7 @@ class CppRunTestsPlugin(PluginABC):
         no_detect_leaks: bool
         args: list[str]
         paths_whitelist: list[str]
+        paths_blacklist: list[str] = list()
         lock_network: bool = True
 
     @staticmethod
@@ -49,6 +50,7 @@ class CppRunTestsPlugin(PluginABC):
     def _run_tests(args: Args, tmp_dir: Path, build_dir: Path, target: str, verbose: bool) -> None:
         env = CppRunTestsPlugin._get_sanitizers_env(args, tmp_dir)
         paths_whitelist = [str(args.root / p) for p in args.paths_whitelist]
+        paths_blacklist = [str(args.root / p) for p in args.paths_blacklist]
         run_args = SafeRunScriptPlugin.Args(
             origin=str(build_dir),
             script=[
@@ -60,6 +62,7 @@ class CppRunTestsPlugin(PluginABC):
             env_additional=env,
             timeout=args.timeout,
             paths_whitelist=paths_whitelist,
+            paths_blacklist=paths_blacklist,
             lock_network=args.lock_network,
         )
         try:
