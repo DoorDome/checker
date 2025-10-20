@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 from typing import Union
 
+from checker.utils import print_info
+
 from ..exceptions import PluginExecutionFailed
 from .base import PluginOutput
 from .scripts import PluginABC, RunScriptPlugin
@@ -99,6 +101,8 @@ class SafeRunScriptPlugin(PluginABC):
             command += args.script
         else:
             assert False, "Now Reachable"
+
+        print_info(f"Firejail command: {command}")
 
         # Will use RunScriptPlugin to run Firejail+command
         run_args = RunScriptPlugin.Args(
