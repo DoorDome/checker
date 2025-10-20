@@ -36,6 +36,7 @@ class SafeRunScriptPlugin(PluginABC):
     def _run(self, args: Args, *, verbose: bool = False) -> PluginOutput:  # type: ignore[override]
         import subprocess
 
+
         # test if firejail script is available
         # TODO: test fallback
         result = subprocess.run(["firejail", "--version"], capture_output=True)
