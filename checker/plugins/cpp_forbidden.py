@@ -22,12 +22,14 @@ class CppForbiddenPlugin(PluginABC):
         forbidden_files: list[str] = []
         forbidden_checker: str
 
-    def _run(self, args: Args, *, verbose: bool = False) -> PluginOutput:  # type: ignore[override]
+    # type: ignore[override]
+    def _run(self, args: Args, *, verbose: bool = False) -> PluginOutput:
         files: list[str] = []
         for r in args.allow_change:
             if r in args.white_list:
                 continue
-            files += list(map(str, args.task_path.glob(r)))
+            files += list([p for p in map(str, args.task_path.glob(r))
+                          if p.endswith(".c") or p.endswith(".cpp") or p.endswith(".h") or p.endswith(".hpp")])
         files = list(set(files))
 
         forbidden: list[str] = []
