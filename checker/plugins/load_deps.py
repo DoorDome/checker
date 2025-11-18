@@ -24,7 +24,7 @@ class LoadDepsPlugin(PluginABC):
             task_path=args.task_path,
             verbose=verbose,
         )
-        return PluginOutput(output="Files have been copied")
+        return PluginOutput(output="Dependencies were updated")
 
     @staticmethod
     def _load_deps(
@@ -41,12 +41,13 @@ class LoadDepsPlugin(PluginABC):
             print_info(f"Remote URL: {remote}\n")
 
         for dep in deps:
+            dep_branch = f"submit/{dep}"
             dep_path = pathlib.Path(task_path) / "_deps" / dep
             if verbose:
-                print_info(f"Clone branch {dep} at {str(dep_path)}\n")
+                print_info(f"Clone branch {dep_branch} at {str(dep_path)}\n")
 
             subprocess.run(
-                ["git", "clone", "--branch", dep, remote, str(dep_path)],
+                ["git", "clone", "--branch", dep_branch, remote, str(dep_path)],
                 capture_output=True,
                 text=True,
                 check=True,
