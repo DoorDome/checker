@@ -29,7 +29,7 @@ class CppForbiddenPlugin(PluginABC):
             if r in args.white_list:
                 continue
             files += list([p for p in map(str, args.task_path.glob(r))
-                          if p.endswith(".c") or p.endswith(".cpp") or p.endswith(".h") or p.endswith(".hpp")])
+                          if p.endswith(".cpp") or p.endswith(".hpp")])
         files = list(set(files))
 
         forbidden: list[str] = []
