@@ -4,6 +4,7 @@ from pathlib import Path
 
 from checker.exceptions import PluginExecutionFailed
 from checker.plugins.cpp.blacklist import get_cpp_blacklist
+from checker.plugins.cpp.style_path import is_file_for_style
 from checker.plugins.firejail import SafeRunScriptPlugin
 from checker.utils import print_info
 
@@ -21,7 +22,8 @@ class CppClangTidyPlugin(PluginABC):
     def _run(self, args: Args, *, verbose: bool = False) -> PluginOutput:  # type: ignore[override]
         lint_files = []
         for f in args.lint_patterns:
-            lint_files += list(map(str, args.task_path.glob(f)))
+            lint_files += list([p for p in map(str,
+                               args.task_path.glob(f)) if is_file_for_style(p)])
         lint_files = list(set(lint_files))
 
         if not lint_files:

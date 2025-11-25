@@ -4,6 +4,7 @@ from pathlib import Path
 
 from checker.exceptions import PluginExecutionFailed
 from checker.plugins.cpp.blacklist import get_cpp_blacklist
+from checker.plugins.cpp.style_path import is_file_for_style
 from checker.plugins.firejail import SafeRunScriptPlugin
 from checker.utils import print_info
 
@@ -11,12 +12,7 @@ from .base import PluginABC, PluginOutput
 
 
 def check_file_path(path: str) -> bool:
-    parsed_path = Path(path)
-    parts = parsed_path.parts
-    print_info(f"Path: {parsed_path.parts}\n")
-    if "_deps" in parts:
-        return False
-    return parsed_path.suffix in [".cpp", ".hpp"]
+    return Path(path).suffix in [".cpp", ".hpp"] and is_file_for_style(path)
 
 
 class CppForbiddenPlugin(PluginABC):
