@@ -37,8 +37,6 @@ class LoadDepsPlugin(PluginABC):
             check=True,
             cwd=root
         ).stdout.strip()
-        if verbose:
-            print_info(f"Remote URL: {remote}\n")
 
         for dep in deps:
             dep_branch = f"submit/{dep}"
