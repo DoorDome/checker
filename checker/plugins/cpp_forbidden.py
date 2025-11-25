@@ -13,6 +13,7 @@ from .base import PluginABC, PluginOutput
 def check_file_path(path: str) -> bool:
     parsed_path = Path(path)
     parts = parsed_path.parts
+    print_info(f"Path: {parsed_path.parts}\n")
     if "_deps" in parts:
         return False
     return parsed_path.suffix in [".cpp", ".hpp"]
