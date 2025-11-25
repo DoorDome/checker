@@ -10,6 +10,14 @@ from checker.utils import print_info
 from .base import PluginABC, PluginOutput
 
 
+def check_file_path(path: str) -> bool:
+    parsed_path = Path(path)
+    parts = parsed_path.parts
+    if "_deps" in parts:
+        return False
+    return parsed_path.suffix in [".cpp", ".hpp"]
+
+
 class CppForbiddenPlugin(PluginABC):
     name = "cpp_forbidden"
 
@@ -29,7 +37,7 @@ class CppForbiddenPlugin(PluginABC):
             if r in args.white_list:
                 continue
             files += list([p for p in map(str, args.task_path.glob(r))
-                          if p.endswith(".cpp") or p.endswith(".hpp")])
+                          if check_file_path(p)])
         files = list(set(files))
 
         forbidden: list[str] = []
