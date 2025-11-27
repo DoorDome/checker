@@ -12,7 +12,7 @@ from .base import PluginABC, PluginOutput
 
 
 def check_file_path(path: str) -> bool:
-    return Path(path).suffix in [".cpp", ".hpp"] and is_file_for_style(path)
+    return Path(path).suffix in [".c", ".h", ".cpp", ".hpp"] and is_file_for_style(path)
 
 
 class CppForbiddenPlugin(PluginABC):
@@ -34,7 +34,7 @@ class CppForbiddenPlugin(PluginABC):
             if r in args.white_list:
                 continue
             files += list([p for p in map(str, args.task_path.glob(r))
-                          if check_file_path(p)])
+                          if is_file_for_style(p)])
         files = list(set(files))
 
         forbidden: list[str] = []
