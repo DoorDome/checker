@@ -11,10 +11,6 @@ from checker.utils import print_info
 from .base import PluginABC, PluginOutput
 
 
-def check_file_path(path: str) -> bool:
-    return Path(path).suffix in [".c", ".h", ".cpp", ".hpp"] and is_file_for_style(path)
-
-
 class CppForbiddenPlugin(PluginABC):
     name = "cpp_forbidden"
 
@@ -22,6 +18,7 @@ class CppForbiddenPlugin(PluginABC):
         reference_root: Path
         task_path: Path
         allow_change: list[str]
+        lint_patterns: list[str]
         white_list: list[str]
         forbidden: list[str] = []
         forbidden_files: list[str] = []
@@ -29,13 +26,19 @@ class CppForbiddenPlugin(PluginABC):
 
     # type: ignore[override]
     def _run(self, args: Args, *, verbose: bool = False) -> PluginOutput:
-        files: list[str] = []
+        changed_files: set[str] = set()
         for r in args.allow_change:
-            if r in args.white_list:
-                continue
-            files += list([p for p in map(str, args.task_path.glob(r))
-                          if is_file_for_style(p)])
-        files = list(set(files))
+            changed_files |= set([p for p in map(str,
+                                  args.task_path.glob(r))])
+        lint_files: set[str] = set()
+        for r in args.lint_patterns:
+            lint_files |= set([p for p in map(str,
+                               args.task_path.glob(r)) if is_file_for_style(p)])
+        white_files: set[str] = set()
+        for r in args.white_list:
+            white_files |= set([p for p in map(str, args.task_path.glob(r))])
+        files = list(changed_files.intersection(
+            lint_files).difference(white_files))
 
         forbidden: list[str] = []
         for f in args.forbidden:
