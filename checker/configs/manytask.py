@@ -46,13 +46,13 @@ class ManytaskDeadlinesType(Enum):
 
 class ReviewStage(str, Enum):
     ORAL = "oral"
-    CODE_REVIEW = "code_review"
+    CODEREVIEW = "codereview"
 
 
 class ManytaskTaskConfig(CustomBaseModel):
     task: str
     review_stages: tuple[ReviewStage, ...] = Field(
-        default=(ReviewStage.ORAL, ReviewStage.CODE_REVIEW), min_length=1, max_length=2
+        default=(ReviewStage.ORAL, ReviewStage.CODEREVIEW), min_length=1, max_length=2
     )
 
     enabled: bool = True

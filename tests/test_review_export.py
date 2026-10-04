@@ -13,7 +13,7 @@ def test_export_private_with_review_config(tmp_path: Path) -> None:
     """Exercise the Docker build command with the review-process YAML contract."""
     source = tmp_path / "source"
     source.mkdir()
-    stages = [["code_review"], ["oral", "code_review"], ["oral"], ["code_review", "oral"]]
+    stages = [["codereview"], ["oral", "codereview"], ["oral"], ["codereview", "oral"]]
     tasks = [{"task": f"task{i}", "score": 10, "review_stages": value} for i, value in enumerate(stages)]
     config = {
         "version": 1,

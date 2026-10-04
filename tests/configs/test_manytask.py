@@ -20,17 +20,17 @@ from checker.configs.manytask import ManytaskDeadlinesConfig, ManytaskGroupConfi
 class TestReviewConfig:
     def test_defaults(self) -> None:
         task = ManytaskTaskConfig(task="task", score=10)
-        assert task.review_stages == (ReviewStage.ORAL, ReviewStage.CODE_REVIEW)
+        assert task.review_stages == (ReviewStage.ORAL, ReviewStage.CODEREVIEW)
         assert ManytaskDeadlinesConfig(timezone="UTC", schedule=[]).oral_attempt_limit == 3
 
-    @pytest.mark.parametrize("stages", [["oral"], ["code_review"], ["oral", "code_review"], ["code_review", "oral"]])
+    @pytest.mark.parametrize("stages", [["oral"], ["codereview"], ["oral", "codereview"], ["codereview", "oral"]])
     def test_review_stages(self, stages: list[str]) -> None:
         task = ManytaskTaskConfig(task="task", score=10, review_stages=stages)
         assert task.model_dump(mode="json")["review_stages"] == stages
 
     @pytest.mark.parametrize(
         "stages",
-        [[], ["oral", "oral"], ["code_review", "code_review"], ["unknown"], ["oral", "code_review", "oral"], "oral", None],
+        [[], ["oral", "oral"], ["codereview", "codereview"], ["unknown"], ["oral", "codereview", "oral"], "oral", None],
     )
     def test_invalid_review_stages(self, stages: Any) -> None:
         with pytest.raises(ValidationError):
