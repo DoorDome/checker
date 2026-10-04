@@ -71,7 +71,10 @@ The following plugins are available out of the box, here is the list with their 
 
     > ::: checker.plugins.aggregate.AggregatePlugin.Args
 
-* `report_score_manytask` - report score to manytask  
+* `report_score_manytask` - report score to manytask. `job_name` is sent unchanged as
+  `request_type`: manual review jobs use `accept`, `request_codereview`, or
+  `request_oral`. Automatic test jobs keep their existing names. Course CI must
+  rename the old `approve`, `changes_written`, and `changes_oral` jobs accordingly.
 
     > ::: checker.plugins.manytask.ManytaskPlugin.Args
 
