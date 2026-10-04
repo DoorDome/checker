@@ -14,7 +14,41 @@ else:
 
 from pydantic import ValidationError
 
-from checker.configs.manytask import ManytaskDeadlinesConfig, ManytaskGroupConfig
+from checker.configs.manytask import ManytaskDeadlinesConfig, ManytaskGroupConfig, ManytaskTaskConfig, ReviewStage
+
+
+class TestReviewConfig:
+    def test_defaults(self) -> None:
+        task = ManytaskTaskConfig(task="task", score=10)
+        assert task.review_stages == (ReviewStage.ORAL, ReviewStage.WRITTEN)
+        assert ManytaskDeadlinesConfig(timezone="UTC", schedule=[]).oral_attempt_limit == 3
+
+    @pytest.mark.parametrize("stages", [["oral"], ["written"], ["oral", "written"], ["written", "oral"]])
+    def test_review_stages(self, stages: list[str]) -> None:
+        task = ManytaskTaskConfig(task="task", score=10, review_stages=stages)
+        assert task.model_dump(mode="json")["review_stages"] == stages
+
+    @pytest.mark.parametrize(
+        "stages",
+        [[], ["oral", "oral"], ["written", "written"], ["unknown"], ["oral", "written", "oral"], "oral", None],
+    )
+    def test_invalid_review_stages(self, stages: Any) -> None:
+        with pytest.raises(ValidationError):
+            ManytaskTaskConfig(task="task", score=10, review_stages=stages)
+
+    @pytest.mark.parametrize("limit", [1, 3, 5])
+    def test_oral_attempt_limit(self, limit: int) -> None:
+        config = ManytaskDeadlinesConfig(timezone="UTC", schedule=[], oral_attempt_limit=limit)
+        assert config.oral_attempt_limit == limit
+
+    @pytest.mark.parametrize("limit", [0, -1, True, False, 1.5, 3.0, "3", None])
+    def test_invalid_oral_attempt_limit(self, limit: Any) -> None:
+        with pytest.raises(ValidationError):
+            ManytaskDeadlinesConfig(timezone="UTC", schedule=[], oral_attempt_limit=limit)
+
+    def test_unknown_task_fields_still_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="extra_forbidden"):
+            ManytaskTaskConfig(task="task", score=10, review_stage=["oral"])
 
 
 class TestManytaskDeadlinesConfigGroup:

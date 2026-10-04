@@ -4,6 +4,7 @@ from datetime import datetime
 from os.path import basename
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import Any, Type
+from urllib.parse import parse_qs
 
 import pytest
 from pydantic import HttpUrl, ValidationError
@@ -34,6 +35,9 @@ class TestManytaskPlugin:
             "report_url": TestManytaskPlugin.BASE_URL,
             "report_token": TestManytaskPlugin.REPORT_TOKEN,
             "check_deadline": TestManytaskPlugin.TEST_CHECK_DEADLINE,
+            "job_name": "test",
+            "merge_request_iid": None,
+            "reported_by": "reviewer",
         }
 
     @staticmethod
@@ -217,7 +221,10 @@ class TestManytaskPlugin:
             "username": self.TEST_USERNAME,
             "score": self.TEST_SCORE,
             "check_deadline": self.TEST_CHECK_DEADLINE,
-            "submit_time": self.TEST_NOW_DATETIME_STR,
+            "request_type": "test",
+            "merge_request_iid": None,
+            "reported_by": "reviewer",
+            "submit_time": "2023-12-21 00:52:36+0600",
         }
 
         mocker.patch.object(ManytaskPlugin, "_collect_files_to_send")
@@ -236,6 +243,31 @@ class TestManytaskPlugin:
         ManytaskPlugin._post_with_retries.assert_called_once_with(
             self.BASE_URL, expected_data, expected_files
         )  # type: ignore[attr-defined]
+
+    @pytest.mark.parametrize("job_name", ["test", "approve", "changes_oral", "changes_written"])
+    @pytest.mark.parametrize("merge_request_iid", [None, 42])
+    def test_review_report_payload(self, job_name: str, merge_request_iid: int | None) -> None:
+        args = self.get_default_args_dict()
+        args.update(
+            job_name=job_name,
+            merge_request_iid=merge_request_iid,
+            score=None,
+            send_time=self.TEST_NOW_DATETIME_STR,
+        )
+        with Mocker() as mocker:
+            mocker.post(f"{self.BASE_URL}api/report", json={"score": 10, "review_status": "?", "reviewer": "ta"})
+            ManytaskPlugin().run(args)
+            data = parse_qs(mocker.last_request.text)
+
+        assert data["request_type"] == [job_name]
+        assert data["reported_by"] == ["reviewer"]
+        assert data["submit_time"] == ["2023-12-21 00:52:36+0600"]
+        assert data["check_deadline"] == ["True"]
+        assert "score" not in data  # manytask uses the task's maximum score
+        if merge_request_iid is None:
+            assert "merge_request_iid" not in data
+        else:
+            assert data["merge_request_iid"] == [str(merge_request_iid)]
 
     def test_verbose(self, mocker: MockFixture) -> None:
         args_dict = self.get_default_full_args_dict()

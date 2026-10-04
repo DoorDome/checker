@@ -44,8 +44,16 @@ class ManytaskDeadlinesType(Enum):
     INTERPOLATE = "interpolate"
 
 
+class ReviewStage(str, Enum):
+    ORAL = "oral"
+    WRITTEN = "written"
+
+
 class ManytaskTaskConfig(CustomBaseModel):
     task: str
+    review_stages: tuple[ReviewStage, ...] = Field(
+        default=(ReviewStage.ORAL, ReviewStage.WRITTEN), min_length=1, max_length=2
+    )
 
     enabled: bool = True
 
@@ -57,6 +65,13 @@ class ManytaskTaskConfig(CustomBaseModel):
 
     # Note: use Optional/Union[...] instead of ... | None as pydantic does not support | in older python versions
     url: Optional[AnyUrl] = None
+
+    @field_validator("review_stages")
+    @classmethod
+    def check_review_stages(cls, stages: tuple[ReviewStage, ...]) -> tuple[ReviewStage, ...]:
+        if len(set(stages)) != len(stages):
+            raise ValueError("Review stages must be unique")
+        return stages
 
     @property
     def name(self) -> str:
@@ -137,6 +152,7 @@ class ManytaskDeadlinesConfig(CustomBaseModel):
     deadlines: ManytaskDeadlinesType = ManytaskDeadlinesType.HARD
     max_submissions: Optional[int] = None
     submission_penalty: float = 0
+    oral_attempt_limit: int = Field(default=3, gt=0, strict=True)
 
     schedule: list[ManytaskGroupConfig]  # list of groups with tasks
 
