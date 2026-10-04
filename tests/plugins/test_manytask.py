@@ -244,7 +244,7 @@ class TestManytaskPlugin:
             self.BASE_URL, expected_data, expected_files
         )  # type: ignore[attr-defined]
 
-    @pytest.mark.parametrize("job_name", ["test", "approve", "changes_oral", "changes_written"])
+    @pytest.mark.parametrize("job_name", ["test", "accept", "request_oral", "request_code_review"])
     @pytest.mark.parametrize("merge_request_iid", [None, 42])
     def test_review_report_payload(self, job_name: str, merge_request_iid: int | None) -> None:
         args = self.get_default_args_dict()

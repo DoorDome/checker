@@ -25,7 +25,7 @@ class ManytaskPlugin(PluginABC):
 
     class Args(PluginABC.Args):
         origin: Optional[str] = None  # as pydantic does not support | in older python versions
-        job_name: str
+        job_name: str  # Manual actions: accept, request_code_review, request_oral.
         merge_request_iid: int | None
         patterns: list[str] = ["*"]
         username: str
